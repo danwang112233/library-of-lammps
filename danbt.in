@@ -88,8 +88,8 @@ compute dr all displace/atom
 thermo 50
 thermo_style custom step etotal epair evdwl ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
 dump dump_positions all atom 100 atomdump
-#dump dump_chargedisplace all custom 100 chardispldump id type c_dr[1] c_dr[2] c_dr[3]
-dump dump_displace all custom 100 displdump id type c_dr[1] c_dr[2] c_dr[3]
+#dump dump_chargedisplace all custom 100 chardispldump id type q c_dr[1] c_dr[2] c_dr[3]
+dump dump_displace all custom 100 displdump id type q c_dr[1] c_dr[2] c_dr[3]
 #fix		msd all 1 1 8000 c_msd[4] file msddumpfile
 #-------------------------------------------------SIMULATION SETTINGS
 fix ef all efield $(v_ex) $(v_ey) $(v_ez)
