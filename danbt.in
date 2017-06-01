@@ -79,7 +79,8 @@ bond_coeff	3	0.0	 23.155	0.0		274.96833333
 #-------------------------------------------------INITIALIZATION SETTINGS
 change_box all triclinic xy delta $(v_XY_DELTA) yz delta $(v_YZ_DELTA) xz delta $(v_XZ_DELTA) remap
 
-compute dr all chargedisplace/atom
+#compute dr all chargedisplace/atom
+compute dr all displace/atom
 
 #-------------------------------------------------FULL PARAMETER LIST
 
@@ -87,7 +88,9 @@ compute dr all chargedisplace/atom
 thermo 50
 thermo_style custom step etotal epair evdwl ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
 dump dump_positions all atom 100 atomdump
+#dump dump_chargedisplace all custom 100 chardispldump id type c_dr[1] c_dr[2] c_dr[3]
 dump dump_displace all custom 100 displdump id type c_dr[1] c_dr[2] c_dr[3]
+#fix		msd all 1 1 8000 c_msd[4] file msddumpfile
 #-------------------------------------------------SIMULATION SETTINGS
 fix ef all efield $(v_ex) $(v_ey) $(v_ez)
 fix_modify ef energy yes
