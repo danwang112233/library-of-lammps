@@ -1,0 +1,101 @@
+# Input file for lammps simulation using Isotropic-anharmonic Shell Model 
+# proposed by Vielma and Schneider based on PBE Generalized Gradient 
+# Approximation(GGA) to Density Functional Theory(DFT): 
+# [Vielma Schneider 2013](http://dx.doi.org/10.1063/1.4827475)
+
+# Vishal Boddu, June 2016
+# Dan, May 2017
+
+
+#-------------------------------------------------PARSING ARGSC
+variable a internal 4.010
+variable alpha internal 89.81
+
+#'a` and `alpha` are lattice parameters
+
+variable n internal 3
+
+#`n` is the number of RVE replica in each direction
+
+
+
+#-------------------------------------------------SIMULATION BOX SETTINGS
+variable l equal v_a*v_n
+variable alpha_r equal ${alpha}*PI/180.0
+variable XY_DELTA equal v_l*cos(${alpha_r})
+variable YZ_DELTA equal v_l*cos(${alpha_r})
+variable XZ_DELTA equal v_l*cos(${alpha_r})#correct till now
+label loop
+#electric field strength in range of [0,20] *0.005
+variable ne loop 0 20 pad
+variable ext_ef equal $(v_ne)*0.005
+variable ex equal $(v_ext_ef)/sqrt(3.0)
+variable ey equal $(v_ext_ef)/sqrt(3.0)
+variable ez equal $(v_ext_ef)/sqrt(3.0)
+
+print "electric field strength = $(v_ext_ef)"
+
+# ------------------------ INITIALIZATION ---------------------------------
+
+units 		metal
+dimension	3
+boundary	p	p	p
+atom_style	full
+
+# ----------------------- ATOM DEFINITION ----------------------------
+
+fix csinfo all property/atom i_CSID
+read_data atom.data fix csinfo NULL CS-Info
+
+#change_box all x scale ${a} y scale ${b} z scale ${c} remap
+#change_box all triclinic xy delta ${XY} xz delta ${XZ} yz delta ${YZ} remap
+#change_box all triclinic xy delta 0.0 xz delta 0.0 yz delta 0.0 remap
+
+group cores type 1 3 5
+group shells type 2 4 6
+
+neighbor 0.5 bin
+neigh_modify delay 10 check yes
+comm_modify vel yes
+
+# ------------------------ FORCE FIELDS ------------------------------
+
+#kspace_style ewald 1.0e-6
+#pair_style   born/coul/long/cs 7.0
+pair_style born/coul/wolf/cs 0.25 16 14.5
+
+#------------------------ A,  rho, sigma=0,     C,      D 
+pair_coeff	*	*	 0.0000	1.0000	0.000	0.0000	0.000
+pair_coeff	2	6	1588.36	0.3553	0.000	0.0000	0.000
+pair_coeff	4	6	3131.25	0.2591	0.000	0.0000	0.000
+pair_coeff	6	6	2641.41	0.3507	0.000	535.37	0.000
+pair_modify tail no
+
+bond_style class2
+bond_coeff	1	0.0	155.820	0.0		   0.0000000
+bond_coeff	2	0.0	166.275	0.0		 20.83333333
+bond_coeff	3	0.0	 23.155	0.0		274.96833333
+
+#-------------------------------------------------INITIALIZATION SETTINGS
+change_box all triclinic xy delta $(v_XY_DELTA) yz delta $(v_YZ_DELTA) xz delta $(v_XZ_DELTA) remap
+
+compute dr all chargedisplace/atom
+
+#-------------------------------------------------FULL PARAMETER LIST
+
+#-------------------------------------------------OUTPUT CONTROL SETTINGS
+thermo 50
+thermo_style custom step etotal epair evdwl ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
+dump dump_positions all atom 100 atomdump
+dump dump_displace all custom 100 displdump id type c_dr[1] c_dr[2] c_dr[3]
+#-------------------------------------------------SIMULATION SETTINGS
+fix ef all efield $(v_ex) $(v_ey) $(v_ez)
+fix_modify ef energy yes
+min_style fire
+minimize 0.0 1e-06 100000 1000
+#min_style quickmin
+#minimize 0.0 1e-06 100000
+
+clear
+next ne
+jump danbt.in loop
