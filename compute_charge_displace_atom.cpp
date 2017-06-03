@@ -114,7 +114,7 @@ void ComputeChargeDisplaceAtom::compute_peratom()
   if (atom->nlocal > nmax) {
     memory->destroy(charge_displace);
     nmax = atom->nmax;
-    memory->create(charge_displace,nmax,4,"chargedisplace/atom:chargedisplace");
+    memory->create(charge_displace,nmax,4,"chargedisplace/atom:charge_displace");
     array_atom = charge_displace;
   }
 
