@@ -96,9 +96,9 @@ dump dump_displace all custom 100 displdump_$(v_ext_ef) id type q c_dr[1] c_dr[2
 fix ef all efield $(v_ex) $(v_ey) $(v_ez)
 fix_modify ef energy yes
 min_style fire
-minimize 0.0 1e-06 100000 1000
-#min_style quickmin
-#minimize 0.0 1e-06 100000
+minimize 0.0 1e-06 20000 100000
+min_style quickmin
+minimize 0.0 1e-06 20000 100000
 
 #clear
 #next ne
