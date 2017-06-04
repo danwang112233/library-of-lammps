@@ -25,10 +25,11 @@ variable alpha_r equal ${alpha}*PI/180.0
 variable XY_DELTA equal v_l*cos(${alpha_r})
 variable YZ_DELTA equal v_l*cos(${alpha_r})
 variable XZ_DELTA equal v_l*cos(${alpha_r})#correct till now
-label loop
-#electric field strength in range of [0,20] *0.005
-variable ne loop 0 20 pad
-variable ext_ef equal $(v_ne)*0.005
+#label loop
+##electric field strength in range of [0,20] *0.005
+#variable ne loop 0 20 pad
+variable ext_ef equal 20*0.005
+#variable ext_ef equal $(v_ne)*0.005
 variable ex equal $(v_ext_ef)/sqrt(3.0)
 variable ey equal $(v_ext_ef)/sqrt(3.0)
 variable ez equal $(v_ext_ef)/sqrt(3.0)
@@ -88,8 +89,8 @@ compute dr all displace/atom
 thermo 50
 thermo_style custom step etotal epair evdwl ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
 dump dump_positions all atom 100 atomdump
-dump dump_chargedisplace all custom 100 chardispldump id type q c_cp[1] c_cp[2] c_cp[3]
-dump dump_displace all custom 100 displdump id type q c_dr[1] c_dr[2] c_dr[3]
+dump dump_chargedisplace all custom 100 chardispldump_$(v_ext_ef) id type q c_cp[1] c_cp[2] c_cp[3]
+dump dump_displace all custom 100 displdump_$(v_ext_ef) id type q c_dr[1] c_dr[2] c_dr[3]
 #fix		msd all 1 1 8000 c_msd[4] file msddumpfile
 #-------------------------------------------------SIMULATION SETTINGS
 fix ef all efield $(v_ex) $(v_ey) $(v_ez)
@@ -99,6 +100,6 @@ minimize 0.0 1e-06 100000 1000
 #min_style quickmin
 #minimize 0.0 1e-06 100000
 
-clear
-next ne
-jump danbt.in loop
+#clear
+#next ne
+#jump danbt.in loop
