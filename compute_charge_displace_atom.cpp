@@ -36,6 +36,7 @@ ComputeChargeDisplaceAtom::ComputeChargeDisplaceAtom(LAMMPS *lmp, int narg, char
   peratom_flag = 1;
   size_peratom_cols = 4;
   create_attribute = 1;
+  atom->q_flag = 1;
 
   // create a new fix STORE style
   // id = compute-ID + COMPUTE_STORE, fix group = compute group
@@ -68,6 +69,7 @@ ComputeChargeDisplaceAtom::ComputeChargeDisplaceAtom(LAMMPS *lmp, int narg, char
     double *q = atom->q;
     imageint *image = atom->image;
     int nlocal = atom->nlocal;
+    int natoms = atom->natoms;//
 
     for (int i = 0; i < nlocal; i++)
       if (mask[i] & groupbit) domain->unmap(x[i],image[i],xoriginal[i]);
@@ -101,6 +103,8 @@ void ComputeChargeDisplaceAtom::init()
   int ifix = modify->find_fix(id_fix);
   if (ifix < 0) error->all(FLERR,"Could not find compute chargedisplace/atom fix ID");
   fix = (FixStore *) modify->fix[ifix];
+
+//bigint ncd = group->count(igroup);
 }
 
 /* ---------------------------------------------------------------------- */
@@ -117,7 +121,12 @@ void ComputeChargeDisplaceAtom::compute_peratom()
     memory->create(charge_displace,nmax,4,"chargedisplace/atom:charge_displace");
     array_atom = charge_displace;
   }
+/*memory->create(mx,2*nlocal,1000,"setup:mx");
 
+This will allocate a 2d array and store the ptr for it
+in mx, wherever you have defined mx.*/
+
+//v
   // dx,dy,dz = displacement of atom from original position
   // original unwrapped position is stored by fix
   // for triclinic, need to unwrap current atom coord via h matrix
@@ -129,6 +138,7 @@ void ComputeChargeDisplaceAtom::compute_peratom()
   int *mask = atom->mask;
   imageint *image = atom->image;
   int nlocal = atom->nlocal;
+  int natoms = atom->natoms;//
 
   double *h = domain->h;
   double xprd = domain->xprd;
@@ -147,10 +157,14 @@ void ComputeChargeDisplaceAtom::compute_peratom()
         dx = x[i][0] + xbox*xprd - xoriginal[i][0];
         dy = x[i][1] + ybox*yprd - xoriginal[i][1];
         dz = x[i][2] + zbox*zprd - xoriginal[i][2];
-        charge_displace[i][0] = dx*q[i];
-        charge_displace[i][1] = dy*q[i];
-        charge_displace[i][2] = dz*q[i];
+        charge_displace[i][0] = dx * double(q[i]);
+        charge_displace[i][1] = dy * double(q[i]);
+        charge_displace[i][2] = dz * double(q[i]);
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
+
+	charge_displace[i][0] /= nlocal / 2;//
+        charge_displace[i][1] /= nlocal / 2;//
+        charge_displace[i][2] /= nlocal / 2;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
 
@@ -163,13 +177,20 @@ void ComputeChargeDisplaceAtom::compute_peratom()
         dx = x[i][0] + h[0]*xbox + h[5]*ybox + h[4]*zbox - xoriginal[i][0];
         dy = x[i][1] + h[1]*ybox + h[3]*zbox - xoriginal[i][1];
         dz = x[i][2] + h[2]*zbox - xoriginal[i][2];
-        charge_displace[i][0] = dx*q[i];
-        charge_displace[i][1] = dy*q[i];
-        charge_displace[i][2] = dz*q[i];
+        charge_displace[i][0] = dx*double(q[i]);
+        charge_displace[i][1] = dy*double(q[i]);
+        charge_displace[i][2] = dz*double(q[i]);
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
+
+	charge_displace[i][0] /= nlocal / 2;//
+        charge_displace[i][1] /= nlocal / 2;//
+        charge_displace[i][2] /= nlocal / 2;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
   }
+        
+        //charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
+
 }
 
 /* ----------------------------------------------------------------------
@@ -188,7 +209,7 @@ void ComputeChargeDisplaceAtom::set_arrays(int i)
 /* ----------------------------------------------------------------------
    memory usage of local atom-based array
 ------------------------------------------------------------------------- */
-
+//V
 double ComputeChargeDisplaceAtom::memory_usage()
 {
   double bytes = nmax*4 * sizeof(double);
