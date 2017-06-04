@@ -13,7 +13,7 @@ variable alpha internal 89.81
 
 #'a` and `alpha` are lattice parameters
 
-variable n internal 3
+variable n internal 1
 
 #`n` is the number of RVE replica in each direction
 
@@ -79,7 +79,7 @@ bond_coeff	3	0.0	 23.155	0.0		274.96833333
 #-------------------------------------------------INITIALIZATION SETTINGS
 change_box all triclinic xy delta $(v_XY_DELTA) yz delta $(v_YZ_DELTA) xz delta $(v_XZ_DELTA) remap
 
-#compute dr all chargedisplace/atom
+compute cp all chargedisplace/atom
 compute dr all displace/atom
 
 #-------------------------------------------------FULL PARAMETER LIST
@@ -88,7 +88,7 @@ compute dr all displace/atom
 thermo 50
 thermo_style custom step etotal epair evdwl ecoul elong ebond fnorm lx ly lz temp press pxx pyy pzz
 dump dump_positions all atom 100 atomdump
-#dump dump_chargedisplace all custom 100 chardispldump id type q c_dr[1] c_dr[2] c_dr[3]
+dump dump_chargedisplace all custom 100 chardispldump id type q c_cp[1] c_cp[2] c_cp[3]
 dump dump_displace all custom 100 displdump id type q c_dr[1] c_dr[2] c_dr[3]
 #fix		msd all 1 1 8000 c_msd[4] file msddumpfile
 #-------------------------------------------------SIMULATION SETTINGS
