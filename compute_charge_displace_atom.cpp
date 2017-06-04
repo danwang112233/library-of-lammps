@@ -182,9 +182,9 @@ in mx, wherever you have defined mx.*/
         charge_displace[i][2] = dz * q[i];
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
 
-	charge_displace[i][0] /= nmax / 2;//
-        charge_displace[i][1] /= nmax / 2;//
-        charge_displace[i][2] /= nmax / 2;//
+	charge_displace[i][0] /= nmax / 10;//
+        charge_displace[i][1] /= nmax / 10;//
+        charge_displace[i][2] /= nmax / 10;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
   }
