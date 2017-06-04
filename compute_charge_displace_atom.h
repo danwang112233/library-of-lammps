@@ -13,7 +13,7 @@
 
 #ifdef COMPUTE_CLASS
 
-ComputeStyle(chargedisplace/atom,ComputeDisplaceAtom)
+ComputeStyle(chargedisplace/atom,ComputeChargeDisplaceAtom)
 
 #else
 
