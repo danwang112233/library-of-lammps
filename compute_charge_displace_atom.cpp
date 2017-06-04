@@ -157,14 +157,14 @@ in mx, wherever you have defined mx.*/
         dx = x[i][0] + xbox*xprd - xoriginal[i][0];
         dy = x[i][1] + ybox*yprd - xoriginal[i][1];
         dz = x[i][2] + zbox*zprd - xoriginal[i][2];
-        charge_displace[i][0] = dx * double(q[i]);
-        charge_displace[i][1] = dy * double(q[i]);
-        charge_displace[i][2] = dz * double(q[i]);
+        charge_displace[i][0] = dx * q[i];
+        charge_displace[i][1] = dy * q[i];
+        charge_displace[i][2] = dz * q[i];
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
 
-	charge_displace[i][0] /= nlocal / 2;//
-        charge_displace[i][1] /= nlocal / 2;//
-        charge_displace[i][2] /= nlocal / 2;//
+	charge_displace[i][0] /= nmax / 10;//
+        charge_displace[i][1] /= nmax / 10;//
+        charge_displace[i][2] /= nmax / 10;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
 
@@ -177,14 +177,14 @@ in mx, wherever you have defined mx.*/
         dx = x[i][0] + h[0]*xbox + h[5]*ybox + h[4]*zbox - xoriginal[i][0];
         dy = x[i][1] + h[1]*ybox + h[3]*zbox - xoriginal[i][1];
         dz = x[i][2] + h[2]*zbox - xoriginal[i][2];
-        charge_displace[i][0] = dx*double(q[i]);
-        charge_displace[i][1] = dy*double(q[i]);
-        charge_displace[i][2] = dz*double(q[i]);
+        charge_displace[i][0] = dx * q[i];
+        charge_displace[i][1] = dy * q[i];
+        charge_displace[i][2] = dz * q[i];
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
 
-	charge_displace[i][0] /= nlocal / 2;//
-        charge_displace[i][1] /= nlocal / 2;//
-        charge_displace[i][2] /= nlocal / 2;//
+	charge_displace[i][0] /= nmax / 2;//
+        charge_displace[i][1] /= nmax / 2;//
+        charge_displace[i][2] /= nmax / 2;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
   }
