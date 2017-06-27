@@ -70,6 +70,7 @@ ComputeChargeDisplaceAtom::ComputeChargeDisplaceAtom(LAMMPS *lmp, int narg, char
     imageint *image = atom->image;
     int nlocal = atom->nlocal;
     int natoms = atom->natoms;//
+    double volume = domain->xprd * domain->yprd * domain->zprd;
 
     for (int i = 0; i < nlocal; i++)
       if (mask[i] & groupbit) domain->unmap(x[i],image[i],xoriginal[i]);
@@ -144,7 +145,7 @@ in mx, wherever you have defined mx.*/
   double xprd = domain->xprd;
   double yprd = domain->yprd;
   double zprd = domain->zprd;
-
+  double volume = xprd * yprd * zprd;
   int xbox,ybox,zbox;
   double dx,dy,dz;
 
@@ -162,9 +163,9 @@ in mx, wherever you have defined mx.*/
         charge_displace[i][2] = dz * q[i];
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
 
-	charge_displace[i][0] /= nmax / 10;//
-        charge_displace[i][1] /= nmax / 10;//
-        charge_displace[i][2] /= nmax / 10;//
+	charge_displace[i][0] /= volume;//
+        charge_displace[i][1] /= volume;//
+        charge_displace[i][2] /= volume;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
 
@@ -182,9 +183,9 @@ in mx, wherever you have defined mx.*/
         charge_displace[i][2] = dz * q[i];
         charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
 
-	charge_displace[i][0] /= nmax / 10;//
-        charge_displace[i][1] /= nmax / 10;//
-        charge_displace[i][2] /= nmax / 10;//
+	charge_displace[i][0] /= volume;//
+        charge_displace[i][1] /= volume;//
+        charge_displace[i][2] /= volume;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
   }
