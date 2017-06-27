@@ -166,6 +166,7 @@ in mx, wherever you have defined mx.*/
 	charge_displace[i][0] /= volume;//
         charge_displace[i][1] /= volume;//
         charge_displace[i][2] /= volume;//
+        charge_displace[i][3] /= volume;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
 
@@ -186,6 +187,7 @@ in mx, wherever you have defined mx.*/
 	charge_displace[i][0] /= volume;//
         charge_displace[i][1] /= volume;//
         charge_displace[i][2] /= volume;//
+        charge_displace[i][3] /= volume;//
       } else charge_displace[i][0] = charge_displace[i][1] =
 	     charge_displace[i][2] = charge_displace[i][3] = 0.0;
   }
