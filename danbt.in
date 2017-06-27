@@ -101,6 +101,6 @@ minimize 0.0 1e-06 20000 100000
 min_style quickmin
 minimize 0.0 1e-06 20000 100000
 
-clear
-next ne
-jump danbt.in loop
+#clear
+#next ne
+#jump danbt.in loop
