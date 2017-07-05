@@ -4,7 +4,7 @@
 # [Vielma Schneider 2013](http://dx.doi.org/10.1063/1.4827475)
 
 # Vishal Boddu, June 2016
-# Dan, May 2017
+# Dan, July 2017
 
 
 #-------------------------------------------------PARSING ARGSC
@@ -82,6 +82,7 @@ change_box all triclinic xy delta $(v_XY_DELTA) yz delta $(v_YZ_DELTA) xz delta 
 
 compute cp all chargedisplace/atom
 compute dr all displace/atom
+compute pol all polar
 #-------------------------------------------------FULL PARAMETER LIST
 
 #-------------------------------------------------OUTPUT CONTROL SETTINGS
@@ -92,6 +93,7 @@ dump dump_positions all atom 100 atomdump
 #dump dump_displace all custom 100 displdump id type q c_dr[1] c_dr[2] c_dr[3]
 dump dump_chargedisplace all custom 100 chardispldump_$(v_ext_ef) id type q c_cp[1] c_cp[2] c_cp[3]
 dump dump_displace all custom 100 displdump_$(v_ext_ef) id type q c_dr[1] c_dr[2] c_dr[3]
+dump dump_polar all custom 100 polardump id type c_pol[1]
 #fix		msd all 1 1 8000 c_msd[4] file msddumpfile
 #-------------------------------------------------SIMULATION SETTINGS
 fix ef all efield $(v_ex) $(v_ey) $(v_ez)
