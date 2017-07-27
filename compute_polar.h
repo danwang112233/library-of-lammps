@@ -46,6 +46,7 @@ class ComputePolar : public Compute {
   double *polar;
   //double **charge_displacement;
   char *id_fix;
+  class ComputeDisplaceAtom **displace;
   class FixStore *fix;
 };
 

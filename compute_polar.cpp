@@ -101,7 +101,7 @@ ComputePolar::~ComputePolar()
 
   delete [] id_fix;
   memory->destroy(polaratom);
-  memory->destroy(polar);
+  //memory->destroy(polar);//
   //memory->destroy(charge_displace);
 }
 
@@ -180,10 +180,10 @@ in mx, wherever you have defined mx.*/
 
       } else polaratom[i][0] = polaratom[i][1] =
 	     polaratom[i][2] = polaratom[i][3] = 0.0;
-       polar[0] +=polaratom[i][0];
+       /*polar[0] +=polaratom[i][0];
        polar[1] +=polaratom[i][1];
        polar[2] +=polaratom[i][2];
-       polar[3] +=polaratom[i][3];}
+       polar[3] +=polaratom[i][3];*/}
 
   } else {
     for (int i = 0; i < nlocal; i++){
@@ -202,10 +202,10 @@ in mx, wherever you have defined mx.*/
 
       } else polaratom[i][0] = polaratom[i][1] =
 	     polaratom[i][2] = polaratom[i][3] = 0.0;
-       polar[0] +=polaratom[i][0];
+       /*polar[0] +=polaratom[i][0];
        polar[1] +=polaratom[i][1];
        polar[2] +=polaratom[i][2];
-       polar[3] +=polaratom[i][3];}
+       polar[3] +=polaratom[i][3];*/}
 }
         
         //charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
