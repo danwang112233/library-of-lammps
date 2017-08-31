@@ -39,10 +39,11 @@ ComputePolar::ComputePolar(LAMMPS *lmp, int narg, char **arg) :
 {
   if (narg != 3) error->all(FLERR,"Illegal compute polar command");
 
-  peratom_flag = 1;
-  size_peratom_cols = 4;//
+  vector_flag = 1;
+  size_vector = 5;
+  extvector = 1;
   create_attribute = 1;
-  atom->q_flag = 1;
+  dynamic_group_allow = 0;
 
   // create a new fix STORE style
   // id = compute-ID + COMPUTE_STORE, fix group = compute group
@@ -67,42 +68,78 @@ ComputePolar::ComputePolar(LAMMPS *lmp, int narg, char **arg) :
   // skip if reset from restart file
 
   if (fix->restart_reset) fix->restart_reset = 0;
-  else {
+  else 
+{
+
     double **xoriginal = fix->astore;
 
     double **x = atom->x;
-    int *mask = atom->mask;
     double *q = atom->q;
-    imageint *image = atom->image;
-    int nlocal = atom->nlocal;
-    int natoms = atom->natoms;//
+    bigint natoms = atom->natoms;//
+    double polaratom[natoms][4];/**/
     double volume = domain->xprd * domain->yprd * domain->zprd;
+//read number of lines of Displdump
 
-    for (int i = 0; i < nlocal; i++)
-      if (mask[i] & groupbit) domain->unmap(x[i],image[i],xoriginal[i]);
-      else xoriginal[i][0] = xoriginal[i][1] = xoriginal[i][2] = 0.0;
-  }
+    char filename[]="displdump";  
+    int n = CountLines(filename);
 
-  // per-atom polar array
+//Displdump data
+   data = new double* [natoms];
+    for(int i = 0; i < natoms; i++)
+    {
+      data[i] = new double[5];
+    }
 
-  nmax = 0;
-  polaratom = NULL;
-  polar = NULL;
-  //charge_displace = NULL;
+  
+    std::ifstream ReadDump;  
+    ReadDump.open(filename,ios::in);  
+    
+    
+    if(ReadDump.fail())  
+    {  
+        cout << "No Displdump file, please check again." << endl;
+    }  
+    
+    for(int i = 0; i < n-natoms; ++i)
+    {
+       ReadDump.ignore (numeric_limits<streamsize>::max(),'\n' );
+    }
+
+    while (!ReadDump.eof())
+   {  
+         for(int j = 0; j < natoms; j++)
+         {    
+             for(int k = 0; k < 5; k++)
+             {
+              ReadDump >>  data[j][k];
+              
+             }
+         }
+         
+    
+   }
+    ReadDump.close();  
+    for(int i = 0; i < natoms; i++)
+    {
+      delete []data[i];
+      
+    }
+    delete []data;
+
+
+}
 }
 
 /* ---------------------------------------------------------------------- */
 
-ComputePolar::~ComputePolar()
-{
+ComputePolar::~ComputePolar(){
   // check nfix in case all fixes have already been deleted
 
   if (modify->nfix) modify->delete_fix(id_fix);
 
   delete [] id_fix;
-  memory->destroy(polaratom);
-  //memory->destroy(polar);//
-  //memory->destroy(charge_displace);
+
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -115,100 +152,107 @@ void ComputePolar::init()
   if (ifix < 0) error->all(FLERR,"Could not find compute Polar fix ID");
   fix = (FixStore *) modify->fix[ifix];
 
-//bigint ncd = group->count(igroup);
+
 }
 
 /* ---------------------------------------------------------------------- */
 
 
-void ComputePolar::compute_peratom()
-{
-  invoked_peratom = update->ntimestep;
+void ComputePolar::compute_vector(){
+  invoked_vector = update->ntimestep;
 
-  // grow local charge displacement array if necessary
-
-  if (atom->nlocal > nmax) {
-    memory->destroy(polaratom);
-    memory->destroy(polar);
-    nmax = atom->nmax;
-    memory->create(polaratom,nmax,4,"polar:polar");
-    array_atom = polaratom;
-    //memory->create(charge_displace,nmax,4,"chargedisplace/atom:charge_displace");
-    //array = polar;
-  }
-/*memory->create(mx,2*nlocal,1000,"setup:mx");
-
-This will allocate a 2d array and store the ptr for it
-in mx, wherever you have defined mx.*/
-
-//v
-  // dx,dy,dz = displacement of atom from original position
-  // original unwrapped position is stored by fix
-  // for triclinic, need to unwrap current atom coord via h matrix
-
-  double **xoriginal = fix->astore;
-
-  double **x = atom->x;
   double *q = atom->q;
-  int *mask = atom->mask;
-  imageint *image = atom->image;
-  int nlocal = atom->nlocal;
-  int natoms = atom->natoms;//
+  bigint natoms = atom->natoms;//
+  double polaratom[natoms][4];/**/
+  double volume = domain->xprd * domain->yprd * domain->zprd;
 
-  double *h = domain->h;
-  double xprd = domain->xprd;
-  double yprd = domain->yprd;
-  double zprd = domain->zprd;
-  double volume = xprd * yprd * zprd;
-  int xbox,ybox,zbox;
-  double dx,dy,dz;
+//read number of lines of Displdump
 
-  if (domain->triclinic == 0) {
-    for (int i = 0; i < nlocal; i++){
-      if (mask[i] & groupbit) {
-        xbox = (image[i] & IMGMASK) - IMGMAX;
-        ybox = (image[i] >> IMGBITS & IMGMASK) - IMGMAX;
-        zbox = (image[i] >> IMG2BITS) - IMGMAX;
-        dx = x[i][0] + xbox*xprd - xoriginal[i][0];
-        dy = x[i][1] + ybox*yprd - xoriginal[i][1];
-        dz = x[i][2] + zbox*zprd - xoriginal[i][2];
-        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / (volume * natoms);
-        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / (volume * natoms);
-        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / (volume * natoms);
-        polaratom[i][3] = sqrt(dx*dx + dy*dy + dz*dz) * fabs(q[i])*\
-                                sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
+    char filename[]="displdump";  
+    int n = CountLines(filename);
 
-      } else polaratom[i][0] = polaratom[i][1] =
-	     polaratom[i][2] = polaratom[i][3] = 0.0;
-       /*polar[0] +=polaratom[i][0];
-       polar[1] +=polaratom[i][1];
-       polar[2] +=polaratom[i][2];
-       polar[3] +=polaratom[i][3];*/}
+//Displdump data
+   data = new double* [natoms];
+    for(int i = 0; i < natoms; i++)
+    {
+      data[i] = new double[5];
+    }
 
-  } else {
-    for (int i = 0; i < nlocal; i++){
-      if (mask[i] & groupbit) {
-        xbox = (image[i] & IMGMASK) - IMGMAX;
-        ybox = (image[i] >> IMGBITS & IMGMASK) - IMGMAX;
-        zbox = (image[i] >> IMG2BITS) - IMGMAX;
-        dx = x[i][0] + h[0]*xbox + h[5]*ybox + h[4]*zbox - xoriginal[i][0];
-        dy = x[i][1] + h[1]*ybox + h[3]*zbox - xoriginal[i][1];
-        dz = x[i][2] + h[2]*zbox - xoriginal[i][2];
-        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / (volume * natoms);
-        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / (volume * natoms);
-        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / (volume * natoms);
-        polaratom[i][3] = sqrt(dx*dx + dy*dy + dz*dz) * fabs(q[i])*\
-                                sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
-
-      } else polaratom[i][0] = polaratom[i][1] =
-	     polaratom[i][2] = polaratom[i][3] = 0.0;
-       /*polar[0] +=polaratom[i][0];
-       polar[1] +=polaratom[i][1];
-       polar[2] +=polaratom[i][2];
-       polar[3] +=polaratom[i][3];*/}
-}
+  
+    std::ifstream ReadDump;  
+    ReadDump.open(filename,ios::in);  
+    
+    
+    if(ReadDump.fail())  
+    {  
+        cout << "No Displdump file, please check again." << endl;
         
-        //charge_displace[i][3] = sqrt(dx*dx + dy*dy + dz*dz)*fabs(q[i]);
+    }  
+    
+    for(int i = 0; i < n-natoms; ++i)
+    {
+       ReadDump.ignore (numeric_limits<streamsize>::max(),'\n' );
+    }
+
+    while (ReadDump.eof())
+   {  
+         for(int j = 0; j < natoms; j++)
+         {    
+             for(int k = 0; k < 5; k++)
+             {
+              ReadDump >>  data[j][k];
+              
+             }
+         }
+         
+    
+   }
+    ReadDump.close();  
+        
+  if (domain->triclinic == 0) 
+{
+    for (int i = 0; i < natoms; i++)
+   {
+      for(int j = 0; j < 5; j++) 
+      {
+
+        polaratom[i][0] = 1.60217662 * 10 * data[i][3] * q[i] / (volume * natoms);
+        polaratom[i][1] = 1.60217662 * 10 * data[i][4] / (volume * natoms);
+        polaratom[i][2] = 1.60217662 * 10 * data[i][5] / (volume * natoms);
+        polaratom[i][3] = sqrt(data[i][3]*data[i][3] + data[i][4]*data[i][4] + data[i][5]*data[i][5]) * fabs(q[i])*\
+                                sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
+
+      } 
+       polar[0] +=polaratom[i][0];
+       polar[1] +=polaratom[i][1];
+       polar[2] +=polaratom[i][2];
+       polar[3] +=polaratom[i][3];
+
+  } 
+}
+else 
+{
+    for (int i = 0; i < natoms; i++)
+   {
+      for(int j = 0; j < 5; j++) 
+      {
+
+        polaratom[i][0] = 1.60217662 * 10 * data[i][3] * q[i] / (volume * natoms);
+        polaratom[i][1] = 1.60217662 * 10 * data[i][4] / (volume * natoms);
+        polaratom[i][2] = 1.60217662 * 10 * data[i][5] / (volume * natoms);
+        polaratom[i][3] = sqrt(data[i][3]*data[i][3] + data[i][4]*data[i][4] + data[i][5]*data[i][5]) * fabs(q[i])*\
+                                sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
+
+      } 
+       polar[0] +=polaratom[i][0];
+       polar[1] +=polaratom[i][1];
+       polar[2] +=polaratom[i][2];
+       polar[3] +=polaratom[i][3];
+
+   } 
+        
+
+}
 
 }
 
@@ -227,11 +271,11 @@ void ComputePolar::set_arrays(int i)
 
 /* ----------------------------------------------------------------------
    memory usage of local atom-based array
-------------------------------------------------------------------------- */
+
 //V
 double ComputePolar::memory_usage()
 {
   double bytes = 4 * sizeof(double);
   return bytes;
 } 
-
+------------------------------------------------------------------------- */

@@ -21,7 +21,14 @@ ComputeStyle(polar,ComputePolar)
 #define LMP_COMPUTE_POLAR_H
 
 #include "compute.h"
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <limits>
 
+
+using namespace std;
 namespace LAMMPS_NS {
 
 class ComputePolar : public Compute {
@@ -29,9 +36,10 @@ class ComputePolar : public Compute {
   ComputePolar(class LAMMPS *, int, char **);
   ~ComputePolar();
   void init();
-  void compute_peratom();
+  void compute_vector();
   void set_arrays(int);
-  double memory_usage();
+ // double memory_usage();
+
   /* ---------------------------------------------------------------------- */
   int sgn(double d){
       if(d<0) return -1;
@@ -39,14 +47,36 @@ class ComputePolar : public Compute {
       else return 1;}
 /* ---------------------------------------------------------------------- */
 
+/*----------------------------------------------------------------------*/
+int CountLines(char *filename)  
+{  
+    ifstream ReadDump;  
+    int n=0;  
+    string tmp;  
+    ReadDump.open(filename, ios::in);
+    if(ReadDump.fail())
+    {  
+        return 0;  
+    }  
+    else  
+    {  
+        while(getline(ReadDump,tmp,'\n'))  
+        {  
+            n++;  
+        }  
+       
+        ReadDump.close();  
+        return n;  
+    }  
+}  
+/*----------------------------------------------------------------------*/
+
  private:
-  int nmax;
-  //double *q;
-  double **polaratom;
-  double *polar;
-  //double **charge_displacement;
+  //bigint natoms = atom->natoms;//change to bigint in the lab
+  double *q;
+  double **data;
+  double polar[4];
   char *id_fix;
-  class ComputeDisplaceAtom **displace;
   class FixStore *fix;
 };
 
