@@ -98,7 +98,7 @@ int main()
     t1 = clock();
     char filename[]="displdump";  
     int n = CountLines(filename);
-    int natoms = 10000;
+    int natoms = 10;
     cout<<"number of lines："<< n <<"\n"<<endl;  
    
     double **data;
@@ -134,13 +134,13 @@ int main()
               
              }
          }
-                //for(int j = 0; j < natoms; j++)
-         //{    
+                for(int j = 0; j < natoms; j++)
+         {    
              for(int k = 0; k < 5; k++)
              {
-              cout << data[9][k] << " " << endl;
+              cout << data[j][k] << " " << endl;
              }
-         //}
+         }
          
     
    }
