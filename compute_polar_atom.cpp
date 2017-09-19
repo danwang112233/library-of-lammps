@@ -210,7 +210,6 @@ void ComputePolarAtom::set_arrays(int i)
   xoriginal[i][0] = x[i][0];
   xoriginal[i][1] = x[i][1];
   xoriginal[i][2] = x[i][2];
-  xoriginal[i][3] = x[i][3];
 }
 
 /* ----------------------------------------------------------------------
