@@ -165,9 +165,9 @@ in mx, wherever you have defined mx.*/
         dx = x[i][0] + xbox*xprd - xoriginal[i][0];
         dy = x[i][1] + ybox*yprd - xoriginal[i][1];
         dz = x[i][2] + zbox*zprd - xoriginal[i][2];
-        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / (volume * natoms);
-        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / (volume * natoms);
-        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / (volume * natoms);
+        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / volume;//(volume * natoms);
+        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / volume;//(volume * natoms);
+        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / volume;//(volume * natoms);
        // polaratom[i][3] = sqrt(dx*dx + dy*dy + dz*dz) * fabs(q[i])*\
                                 sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
 
@@ -184,9 +184,9 @@ in mx, wherever you have defined mx.*/
         dx = x[i][0] + h[0]*xbox + h[5]*ybox + h[4]*zbox - xoriginal[i][0];
         dy = x[i][1] + h[1]*ybox + h[3]*zbox - xoriginal[i][1];
         dz = x[i][2] + h[2]*zbox - xoriginal[i][2];
-        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / (volume * natoms);
-        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / (volume * natoms);
-        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / (volume * natoms);
+        polaratom[i][0] = 1.60217662 * 10 * dx * q[i] / volume;//(volume * natoms);
+        polaratom[i][1] = 1.60217662 * 10 * dy * q[i] / volume;//(volume * natoms);
+        polaratom[i][2] = 1.60217662 * 10 * dz * q[i] / volume;//(volume * natoms);
         //polaratom[i][3] = sqrt(dx*dx + dy*dy + dz*dz) * fabs(q[i])*\
                                 sgn(polaratom[i][0])*sgn(polaratom[i][1])*sgn(polaratom[i][2]);
 
@@ -221,4 +221,3 @@ double ComputePolarAtom::memory_usage()
   double bytes = 4 * sizeof(double);
   return bytes;
 } 
-
